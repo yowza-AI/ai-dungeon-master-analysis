@@ -1,169 +1,150 @@
-﻿# 🎭 AI Storyteller: Personalized Bedtime Stories with Consistent Character Voices
+﻿# 🐉 AI Dungeon Master: Tool-Calling D&D 5e Rules Engine + Tactics AI
 
-> **The problem**: Mass-produced bedtime stories are generic. They don't fit your child's interests, age, or attention span. Characters change voices between stories. Parents read the same dozen books on rotation.
+> **The problem**: Running D&D requires the DM to memorize combat rules, manage initiative, calculate damage, track conditions, and optimize NPC tactics—all while narrating. It's cognitive overload.
 
-**AI Storyteller solves this** with a personalized story generation engine: write unique stories tailored to your child's preferences, with consistent character voices, proper age-rating, and emotion-aware narration — all generated locally on your machine.
-
----
-
-## What You Can Do
-
-### Generate Stories Personalized to Your Child
-
-1. **Enter your child's name, age, interests**
-2. **Pick a genre** (Fluffy, Fantasy, Sci-Fi, Suspense, Horror)
-3. **Set a content ceiling** (G, PG, PG-13, R — "Horror+G" is charming-spooky; "Horror+PG-13" is genuinely eerie)
-4. **Choose a cast** (reusable characters with persistent voices)
-5. **Generate** (multi-agent writers' room writes, QA refines, manager approves)
-6. **Play** (local narration with emotion-aware voices)
-
-### Character Persistence & Voice Continuity
-
-- **First mention**: The system detects new characters and designs them (persona, motivations, backstory, voice description)
-- **Maps to voice**: Each character gets a unique voice with their emotion-style baked in
-- **Reused every story**: Same character = same voice across all future stories
-- Result: Kids recognize their favorite characters instantly
-
-### Emotion-Aware Narration
-
-- **Per-line emotion control**: Each story line carries emotion metadata (sad, excited, terrified, sleepy)
-- **Voice generation respects it**: Narrator and characters speak with appropriate emotion, not flat
-- **Multi-voice casting**: Narrator (steady, gravelly), main characters (expressive), background characters (distinct)
-
-### All Local—Privacy Included
-
-- Runs on your machine (Ollama + local TTS)
-- Stories never leave your hard drive
-- No cloud API calls, no tracking, no data collection
-- Works offline once models are cached
+**AI Dungeon Master solves this** with a deterministic rules engine that handles all D&D 5e mechanics, a tactics engine that plans NPC combat strategy, and LLM narration that brings it to life. The DM narrates; the AI handles the math.
 
 ---
 
-## How It Works
+## What It Does
 
-### The Writers' Room (Multi-Agent Pipeline)
+### Deterministic Rules Engine (D&D 5e SRD)
 
-```
-📝 Writer Agent
-  ↓ (writes initial story)
-🔍 QA/QC Agent
-  ↓ (checks age-rating, story flow)
-✅ Manager Agent
-  ↓ (final approval + quality gate)
-🎭 Casting Agent
-  └─→ Character Detection & Voice Design
-      ├─ Detects new characters
-      ├─ Designs persona + voice description
-      ├─ Maps to voice preset or designs custom voice
-      └─ Persists for reuse in future stories
-```
+- **Attack resolution**: bonuses, advantage/disadvantage, critical hits, damage rolls
+- **Saving throws & ability checks**: DC scaling, proficiency, custom modifiers
+- **Spells & abilities**: parsed from SRD, resolved with correct mechanics
+- **Conditions**: tracking effects (grappled, restrained, poisoned, etc.)
+- **Opportunity attacks**: triggered automatically when enemies leave melee reach
+- **Action economy**: bonus actions, reactions, movement per turn
 
-Each story goes through 1-2 QA rounds (configurable). The manager has final say on age-rating compliance.
+### Combat Tactics Engine (Deterministic, Intelligent)
 
-### Narration Pipeline
+Creatures fight smart without an LLM per turn:
+- **Target scoring**: prioritize low-HP enemies, casters, threats
+- **Movement**: calculate reachable targets and optimal positioning
+- **Action economy**: choose attack/dash/disengage/dodge based on situation
+- **Intelligence dial**: MINDLESS (attacks nearest), ANIMAL (weak self-preservation), SMART (focus-fire, kiting, retreat)
+- **Opportunity attacks**: enemies get reactions when creatures leave melee range
 
-**The Voice Strategy**:
-- **Narrator** (steady, gravelly clone): reads all narration lines consistently
-- **Characters** (emotion-rich VoiceDesign): each line carries emotion metadata (scared, excited, thoughtful), reflected in voice
+### DM Agent (Tool-Calling Loop)
 
-**Rendering**:
-1. Build script: per-line character + emotion + text
-2. **Pass A**: Render all narrator clips via voice clone (reproducible, steady)
-3. **Pass B**: Render all character clips via emotion-aware VoiceDesign (expressive, unique per emotion)
-4. **Concatenate** with smooth gaps (~0.28s) in original order
+LLM-powered adjudication:
+- Player describes action in free form
+- DM agent parses intent and decides which mechanic applies
+- Calls deterministic rules tools (never invents numbers)
+- Receives actual dice results
+- Narrates what happens, incorporating real outcomes
 
-**Time**: ~30 min for a ~10-min story on a 2080-series GPU (generate-ahead-of-bedtime queue).
+### Character Persistence
+
+- **NPC stat blocks**: stored, reused across sessions
+- **Combatants**: HP, conditions, position tracked during encounter
+- **Voice/personality**: set per NPC for flavor narration during turns
 
 ---
 
 ## Architecture
 
-```
-┌──────────────────────────────┐
-│ Frontend (Vanilla HTML/JS)   │
-│ ├─ Child profile             │
-│ ├─ Story parameters          │
-│ ├─ Character library         │
-│ └─ Playback + history        │
-└────────────┬─────────────────┘
-             ↓
-┌──────────────────────────────────┐
-│ Backend (FastAPI)                │
-│ ├─ Writers' room (Ollama)       │
-│ │  ├─ Writer agent             │
-│ │  ├─ QA/QC agent              │
-│ │  ├─ Manager agent            │
-│ │  └─ Casting agent            │
-│ ├─ Narration pipeline           │
-│ │  ├─ Voice cloning (Base TTS)  │
-│ │  ├─ Emotion TTS (VoiceDesign) │
-│ │  └─ Concatenation            │
-│ └─ Data access (SQLite)         │
-└────────────┬─────────────────────┘
-             ↓
-┌──────────────────────────────────┐
-│ Local Models (GPU)               │
-│ ├─ Ollama (story writing)        │
-│ │  └─ qwen2.5:7b-instruct       │
-│ └─ Qwen3-TTS (narration)        │
-│    ├─ Base model (voice cloning)│
-│    └─ VoiceDesign (emotion TTS) │
-└──────────────────────────────────┘
-```
+Player Action (free form)
+  ↓
+DM Agent (LLM + tools)
+  ├─ Parse intent
+  ├─ Decide which mechanic
+  └─ Call appropriate tool(s)
+       ↓
+Rules Engine (deterministic)
+  ├─ Attack rolls
+  ├─ Damage rolls
+  ├─ Saving throws
+  ├─ Condition tracking
+  └─ Opportunity attacks
+       ↓
+Tool Results (actual numbers)
+  ↓
+DM Agent (narration)
+  └─ Incorporates real outcomes
+       ↓
+NPC Turn (if combat)
+  ↓
+Tactics Engine (deterministic)
+  └─ Plan optimal action
+       ↓
+NPC Agent (executes + narrates)
+  ├─ Movement
+  ├─ Attacks (with opportunity AoO)
+  ├─ Conditions
+  └─ Flavor narration
 
-**Key Design Decisions:**
+---
 
-1. **Multi-Agent Writers' Room**
-   - Writer generates a rough draft
-   - QA checks for age-rating compliance and story flow
-   - Manager makes final quality call
-   - Result: Better stories than any single agent
+## Key Architectural Decisions
 
-2. **Character Persistence**
-   - Casting agent detects new characters and designs them
-   - Voice is persisted in the database
-   - Reused in every future story
-   - Kids recognize their favorite characters instantly
+### 1. Mechanics as Deterministic Tools (Not LLM Output)
 
-3. **Emotion-Aware Narration**
-   - Each line carries emotion metadata (scared, excited, sleepy)
-   - VoiceDesign TTS respects emotion in voice generation
-   - Narrator stays steady (clone), characters are expressive (VoiceDesign)
-   - Result: Stories feel alive, not monotone
+Every number comes from tools: Initiative rolls, Attack bonuses, Damage dice, Saving throws, Condition applications.
 
-4. **Local-First Architecture**
-   - All generation on your machine (Ollama + local TTS)
-   - Stories are private by default
-   - No cloud dependency, no tracking
-   - Works offline once models cached
+The LLM **never** invents mechanics. It decides *which* tool to call, then narrates the actual result.
 
-5. **Graceful Fallbacks**
-   - TTS disabled? App still runs with silent script
-   - Can use any Ollama-compatible model, not just Qwen
-   - Emotion TTS unavailable? Fall back to preset voices
+### 2. Tactics as Pure Heuristics (Not LLM per Turn)
+
+Combat planning is **deterministic**:
+- Creature intelligence dial (MINDLESS / ANIMAL / SMART)
+- Target scoring based on threat
+- Movement to optimal position
+- Fast (~milliseconds per turn), repeatable, no LLM tokens
+
+An optional LLM adds 1-2 sentences of flavor *after* mechanics are locked in (TIER_EASY, cheap).
+
+### 3. Tool-Calling DM Agent (Free-Form Player Input)
+
+Players say what they *do*, not the mechanics:
+- "I try to grapple the orc" → agent calls make_contested_check (STR vs STR)
+- "I cast fireball on the cluster" → agent calls cast_spell(fireball, targets)
+- "I disengage and dash to the door" → agent calls movement then dash
+
+The agent parses intent and **calls the right tools**; it never computes anything.
+
+### 4. NPC Turns: Deterministic Plan → Tool Execution → Optional Flavor
+
+Tactical Plan (from heuristics) → NPC Agent executes via tools → Tool results locked in → Optional LLM flavor (in-character, doesn't change mechanics)
+
+### 5. Character Persistence (Database)
+
+NPCs are database records:
+- Stat blocks (AC, HP, attacks, spells, abilities)
+- Personality / voice description (for flavor)
+- Combat state during encounter (HP, conditions, position)
+- Reused across sessions
+
+### 6. LLM Provider Abstraction
+
+Works with either:
+- **Claude** (via Anthropic API) — for complex narration
+- **Local** (Ollama) — for privacy, no API keys
+
+Same session logic, different backend.
 
 ---
 
 ## Tech Stack
 
-| Layer | Technology | Why |
-|-------|-----------|-----|
-| **Frontend** | HTML + Vanilla JS + CSS | Simple, no dependencies, instant UI |
-| **Backend** | FastAPI + Uvicorn | Fast async API, minimal overhead |
-| **Story Writing** | Ollama (qwen2.5:7b-instruct) | Open, runs locally, good narrative quality |
-| **Narration** | Qwen3-TTS 1.7B (FP16 on GPU) | Emotion-aware, voice cloning, runs on 2080s |
-| **Storage** | SQLite | Reliable, no server, story persistence |
-| **Data** | Character library, story archive | Enables continuity and discovery |
+| Component | Technology | Why |
+|-----------|-----------|-----|
+| **Rules Engine** | Python + custom logic | Deterministic, fast, SRD-compliant |
+| **Combat AI** | Pure heuristics (no LLM) | Fast, repeatable, tunable intelligence dial |
+| **DM Agent** | LLM + tool calling | Parses free-form input, calls mechanics tools |
+| **LLM Backend** | Claude or Ollama | Narration, flavor, adjudication |
+| **Data** | SQLite | NPC stat blocks, campaign state, combat log |
 
 ---
 
 ## Development Approach
 
 
-This demonstrates: building a **multi-agent creative system** where the architecture actively improves output quality (writers' room → QA → approval), and where persistent character state (voices) creates continuity across generated content.
+This demonstrates: building a **domain-specific tool system** where mechanics are deterministic (never ambiguous), tactics are algorithmic (fast + repeatable), and LLM narration enhances without changing outcomes. The AI handles the burden; the DM keeps control.
 
 ---
 
-**Status**: Working MVP  
-**Users**: Parents, bedtime-time readers, voice enthusiasts  
-**Philosophy**: Local-first, privacy-respecting, emotion-aware storytelling
+**Status**: MVP with core mechanics working  
+**Philosophy**: Tools handle mechanics, LLM handles narration  
+**Core Loop**: Player action → DM agent (tools) → Rules engine → Narration
