@@ -1,6 +1,6 @@
 ﻿# 🐉 AI Dungeon Master: Tool-Calling D&D 5e Rules Engine + Tactics AI
 
-> **The problem**: Running D&D requires a Dungeon Master (DM) - the person running the game for the rest of the group.  Experienced DMs are under-represented in the D&D community, and many groups of friends are left wanted to play the game, but unable due to the lack of DMs.  Even one is found, the Dungeon Master must memorize combat rules, manage initiative, calculate damage, track conditions, and optimize NPC tactics—all while narrating. It's cognitive overload.
+> **The problem**: Running D&D requires a Dungeon Master (DM) - the person running the game for the rest of the group.  Experienced DMs are under-represented in the D&D community, and many groups of friends are left wanting to play the game, but unable due to the lack of DMs.  Even when one is found, the Dungeon Master must memorize combat rules, manage initiative, calculate damage, track conditions, and optimize NPC tactics—all while narrating. It's cognitive overload.
 
 **AI Dungeon Master solves this** with a deterministic rules engine that handles all D&D 5e mechanics, a tactics engine that plans NPC combat strategy, and LLM narration that brings it to life. The DM narrates; the AI handles the math.
 
